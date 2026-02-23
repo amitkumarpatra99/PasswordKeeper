@@ -259,7 +259,7 @@ export default function Mannager() {
       </div>
 
       {/* 🔹 Animation */}
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
