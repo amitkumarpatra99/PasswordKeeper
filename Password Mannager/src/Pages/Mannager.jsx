@@ -1,21 +1,29 @@
-"use client";
 import { useEffect, useRef, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+  FaEye,
+  FaEyeSlash,
+  FaClipboard,
+  FaEdit,
+  FaTrash,
+  FaSave,
+  FaSearch,
+  FaShieldAlt,
+  FaLock,
+  FaDatabase,
+} from "react-icons/fa";
 
 export default function Mannager() {
-  const ref = useRef();
   const passwordRef = useRef();
+  const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ site: "", username: "", password: "" });
   const [passwordArray, setPasswordArray] = useState([]);
   const [search, setSearch] = useState("");
 
-  // 🧩 Connect to your local backend (connected to MongoDB Compass)
   const API_URL = "http://localhost:5000/api/passwords";
 
-
-
-  // ✅ Load all passwords from backend (MongoDB)
+  // Load all passwords from backend (MongoDB)
   useEffect(() => {
     fetch(API_URL)
       .then((res) => res.json())
@@ -23,18 +31,15 @@ export default function Mannager() {
       .catch(() => toast.error("❌ Unable to connect to database"));
   }, []);
 
-  // ✅ Toggle password visibility
+  // Toggle password visibility
   const showPassword = () => {
-    if (passwordRef.current.type === "password") {
-      passwordRef.current.type = "text";
-      ref.current.src = "/icons/hide.png";
-    } else {
-      passwordRef.current.type = "password";
-      ref.current.src = "/icons/visible.png";
+    setShowPass((prev) => !prev);
+    if (passwordRef.current) {
+      passwordRef.current.type = passwordRef.current.type === "password" ? "text" : "password";
     }
   };
 
-  // ✅ Save new password (POST to backend)
+  // Save new password (POST to backend)
   const savePassword = async () => {
     if (
       form.site.trim().length < 3 ||
@@ -54,13 +59,13 @@ export default function Mannager() {
       const data = await res.json();
       setPasswordArray((prev) => [...prev, data]);
       setForm({ site: "", username: "", password: "" });
-      toast.success("Password Saved ☑️", { theme: "dark" });
+      toast.success("Password Saved ✅", { theme: "dark" });
     } catch {
       toast.error("Failed to save password ❌", { theme: "dark" });
     }
   };
 
-  // ✅ Delete password
+  // Delete password
   const deletePassword = async (id) => {
     if (confirm("Delete this password?")) {
       try {
@@ -73,7 +78,7 @@ export default function Mannager() {
     }
   };
 
-  // ✅ Edit password (PUT)
+  // Edit password (PUT)
   const editPassword = async (id) => {
     const found = passwordArray.find((i) => i._id === id);
     if (!found) return;
@@ -90,18 +95,18 @@ export default function Mannager() {
     }
   };
 
-  // ✅ Copy text
+  // Copy text
   const copyText = (text) => {
     navigator.clipboard.writeText(text);
-    toast.success("Copied to Clipboard 📋", { theme: "dark" });
+    toast.success("Copied to Clipboard!", { theme: "dark" });
   };
 
-  // ✅ Handle input
+  // Handle input
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ✅ Filtered results
+  // Filtered results
   const filteredPasswords = passwordArray.filter(
     (p) =>
       p.site.toLowerCase().includes(search.toLowerCase()) ||
@@ -112,71 +117,87 @@ export default function Mannager() {
     <div className="min-h-screen flex flex-col items-center pt-32 pb-24 px-4 sm:px-8 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white overflow-hidden">
       <ToastContainer theme="dark" position="top-right" />
 
-      {/* 🔹 Title Section */}
+      {/* Title Section */}
       <div className="animate-fadeIn w-full flex flex-col items-center">
-        <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
-          Password Keeper
-        </h1>
-        <p className="text-gray-300 text-center mb-8 text-base sm:text-lg">
-          Manage your passwords securely — stored in MongoDB 🧩
+        <div className="flex items-center gap-3 mb-3">
+          <FaShieldAlt className="text-cyan-400 text-4xl sm:text-5xl drop-shadow-[0_0_12px_#00ffff]" />
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
+            Password Keeper
+          </h1>
+        </div>
+        <p className="text-gray-300 text-center mb-8 text-base sm:text-lg flex items-center gap-2">
+          Manage your passwords securely — stored in MongoDB <FaDatabase className="text-cyan-400" />
         </p>
 
-        {/* 🔹 Form */}
+        {/* Form */}
         <div className="bg-white/10 backdrop-blur-2xl border border-white/10 p-6 sm:p-8 rounded-3xl w-full max-w-lg flex flex-col gap-4 sm:gap-5 shadow-lg transition-all duration-300 hover:scale-[1.02]">
-          <input
-            value={form.site}
-            onChange={handleChange}
-            placeholder="🌐 Website URL"
-            className="rounded-xl bg-white/10 border border-white/20 p-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all"
-            type="text"
-            name="site"
-          />
-          <input
-            value={form.username}
-            onChange={handleChange}
-            placeholder="👤 Username / Email"
-            className="rounded-xl bg-white/10 border border-white/20 p-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all"
-            type="text"
-            name="username"
-          />
+          <div className="relative">
+            <FaShieldAlt className="absolute left-3 top-3.5 text-cyan-400 text-base" />
+            <input
+              value={form.site}
+              onChange={handleChange}
+              placeholder="Website URL"
+              className="w-full pl-9 rounded-xl bg-white/10 border border-white/20 p-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all"
+              type="text"
+              name="site"
+            />
+          </div>
+
+          <div className="relative">
+            <FaLock className="absolute left-3 top-3.5 text-cyan-400 text-base" />
+            <input
+              value={form.username}
+              onChange={handleChange}
+              placeholder="Username / Email"
+              className="w-full pl-9 rounded-xl bg-white/10 border border-white/20 p-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all"
+              type="text"
+              name="username"
+            />
+          </div>
+
           <div className="relative w-full">
+            <FaLock className="absolute left-3 top-3.5 text-cyan-400 text-base" />
             <input
               ref={passwordRef}
               value={form.password}
               onChange={handleChange}
-              placeholder="🔒 Password"
-              className="rounded-xl bg-white/10 border border-white/20 p-3 w-full text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all"
+              placeholder="Password"
+              className="rounded-xl bg-white/10 border border-white/20 p-3 pl-9 w-full text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all"
               type="password"
               name="password"
             />
-            <img
-              ref={ref}
+            <button
               onClick={showPassword}
-              className="w-6 absolute right-3 top-3 cursor-pointer hover:scale-110 transition"
-              src="/icons/visible.png"
-              alt="toggle"
-            />
+              className="absolute right-3 top-3 text-gray-400 hover:text-cyan-400 transition"
+              aria-label="Toggle password visibility"
+            >
+              {showPass ? <FaEyeSlash className="text-xl" /> : <FaEye className="text-xl" />}
+            </button>
           </div>
 
           <button
             onClick={savePassword}
-            className="mt-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-blue-700 hover:to-cyan-400 text-white font-semibold rounded-xl py-3 transition-all duration-300"
+            className="mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-blue-700 hover:to-cyan-400 text-white font-semibold rounded-xl py-3 transition-all duration-300"
           >
-            💾 Save Password
+            <FaSave className="text-lg" />
+            Save Password
           </button>
         </div>
 
-        {/* 🔹 Search */}
+        {/* Search */}
         <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-10 w-full max-w-3xl">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="🔍 Search by site or username..."
-            className="rounded-xl bg-white/10 border border-white/20 p-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all w-72 sm:w-80"
-          />
+          <div className="relative w-72 sm:w-80">
+            <FaSearch className="absolute left-3 top-3.5 text-gray-400 text-base" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by site or username..."
+              className="w-full pl-9 rounded-xl bg-white/10 border border-white/20 p-3 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:bg-white/20 transition-all"
+            />
+          </div>
         </div>
 
-        {/* 🔹 Password Table */}
+        {/* Password Table */}
         <div className="mt-10 w-full max-w-5xl overflow-x-auto">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-center text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
             Saved Passwords
@@ -212,42 +233,49 @@ export default function Mannager() {
                         </a>
                         <button
                           onClick={() => copyText(item.site)}
-                          className="ml-2 text-gray-400 hover:text-white"
+                          className="ml-2 text-gray-400 hover:text-cyan-400 transition"
+                          title="Copy"
                         >
-                          📋
+                          <FaClipboard className="inline text-base" />
                         </button>
                       </td>
                       <td className="p-3 sm:p-4">
                         {item.username}
                         <button
                           onClick={() => copyText(item.username)}
-                          className="ml-2 text-gray-400 hover:text-white"
+                          className="ml-2 text-gray-400 hover:text-cyan-400 transition"
+                          title="Copy"
                         >
-                          📋
+                          <FaClipboard className="inline text-base" />
                         </button>
                       </td>
                       <td className="p-3 sm:p-4">
                         {item.password}
                         <button
                           onClick={() => copyText(item.password)}
-                          className="ml-2 text-gray-400 hover:text-white"
+                          className="ml-2 text-gray-400 hover:text-cyan-400 transition"
+                          title="Copy"
                         >
-                          📋
+                          <FaClipboard className="inline text-base" />
                         </button>
                       </td>
-                      <td className="p-3 sm:p-4 flex justify-center gap-3">
-                        <span
-                          onClick={() => editPassword(item._id)}
-                          className="cursor-pointer hover:text-yellow-400"
-                        >
-                          ✏️
-                        </span>
-                        <span
-                          onClick={() => deletePassword(item._id)}
-                          className="cursor-pointer hover:text-red-400"
-                        >
-                          🗑️
-                        </span>
+                      <td className="p-3 sm:p-4">
+                        <div className="flex justify-center gap-4">
+                          <button
+                            onClick={() => editPassword(item._id)}
+                            className="text-gray-400 hover:text-yellow-400 transition"
+                            title="Edit"
+                          >
+                            <FaEdit className="text-lg" />
+                          </button>
+                          <button
+                            onClick={() => deletePassword(item._id)}
+                            className="text-gray-400 hover:text-red-400 transition"
+                            title="Delete"
+                          >
+                            <FaTrash className="text-lg" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -258,7 +286,6 @@ export default function Mannager() {
         </div>
       </div>
 
-      {/* 🔹 Animation */}
       <style>{`
         @keyframes fadeIn {
           from {
