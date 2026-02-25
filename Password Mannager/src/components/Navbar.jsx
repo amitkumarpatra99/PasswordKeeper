@@ -109,7 +109,7 @@ const Navbar = () => {
             className="flex items-center gap-2 text-white hover:text-cyan-400 transition-all duration-200"
           >
             <FaHome className="text-lg" />
-            Home
+            {/* Home */}
           </Link>
 
           <a
@@ -119,7 +119,7 @@ const Navbar = () => {
             className="flex items-center gap-2 text-white hover:text-cyan-400 transition-all duration-200"
           >
             <FaGithub className="text-2xl" />
-            GitHub
+            {/* GitHub */}
           </a>
 
           <a
@@ -129,7 +129,7 @@ const Navbar = () => {
             className="flex items-center gap-2 text-white hover:text-cyan-400 transition-all duration-200"
           >
             <FaUserCircle className="text-2xl text-cyan-400" />
-            Developer
+            {/* Developer */}
           </a>
         </div>
       </div>
