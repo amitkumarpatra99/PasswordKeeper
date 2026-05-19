@@ -45,22 +45,29 @@ function generatePassword(length = 16) {
 export default function Mannager() {
   const passwordRef = useRef();
   const [showPass, setShowPass] = useState(false);
-  const [form, setForm] = useState({ site: "", username: "", password: "" });
+  const [form, setForm] = useState({ site: "", username: "", password: "", id: "" });
   const [errors, setErrors] = useState({});
   const [passwordArray, setPasswordArray] = useState([]);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-  const API_URL = "http://localhost:5000/api/passwords";
   const strength = getStrength(form.password);
 
-  // Load all passwords from backend (MongoDB)
   useEffect(() => {
-    fetch(API_URL)
-      .then((res) => res.json())
-      .then((data) => setPasswordArray(data))
-      .catch(() => toast.error("❌ Unable to connect to database"));
+    const saved = localStorage.getItem("passwords");
+    if (saved) {
+      try {
+        setPasswordArray(JSON.parse(saved));
+      } catch {
+        localStorage.removeItem("passwords");
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("passwords", JSON.stringify(passwordArray));
+  }, [passwordArray]);
 
   // Toggle password visibility
   const showPassword = () => {
@@ -95,50 +102,48 @@ export default function Mannager() {
 
   // Clear form
   const clearForm = () => {
-    setForm({ site: "", username: "", password: "" });
+    setForm({ site: "", username: "", password: "", id: "" });
     setErrors({});
     setShowPass(false);
+    setIsEditing(false);
   };
 
-  // Save new password
-  const savePassword = async () => {
+  // Save new password or update existing entry
+  const savePassword = () => {
     if (!validate()) return;
     setSaving(true);
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      setPasswordArray((prev) => [...prev, data]);
-      clearForm();
-      toast.success("✅ Password Saved!", { theme: "dark" });
-    } catch {
-      toast.error("❌ Failed to save password", { theme: "dark" });
-    } finally {
-      setSaving(false);
+
+    const entry = {
+      ...form,
+      id: form.id || Date.now().toString(),
+    };
+
+    if (isEditing) {
+      setPasswordArray((prev) => prev.map((item) => (item.id === entry.id ? entry : item)));
+      toast.success("✅ Password updated!", { theme: "dark" });
+    } else {
+      setPasswordArray((prev) => [...prev, entry]);
+      toast.success("✅ Password saved!", { theme: "dark" });
     }
+
+    clearForm();
+    setSaving(false);
   };
 
   // Delete password
-  const deletePassword = async (id) => {
+  const deletePassword = (id) => {
     if (confirm("Delete this password?")) {
-      try {
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-        setPasswordArray(passwordArray.filter((item) => item._id !== id));
-        toast.info("🗑️ Password Deleted", { theme: "dark" });
-      } catch {
-        toast.error("❌ Failed to delete", { theme: "dark" });
-      }
+      setPasswordArray((prev) => prev.filter((item) => item.id !== id));
+      toast.info("🗑️ Password Deleted", { theme: "dark" });
     }
   };
 
   // Edit password
   const editPassword = (id) => {
-    const found = passwordArray.find((i) => i._id === id);
+    const found = passwordArray.find((i) => i.id === id);
     if (!found) return;
-    setForm({ site: found.site, username: found.username, password: found.password });
+    setForm({ site: found.site, username: found.username, password: found.password, id: found.id });
+    setIsEditing(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
     toast.info("✏️ Edit mode — update and save", { theme: "dark" });
   };
@@ -180,7 +185,7 @@ export default function Mannager() {
           </h1>
         </div>
         <p className="text-gray-300 text-center mb-8 text-base sm:text-lg flex items-center gap-2">
-          Manage your passwords securely — stored in MongoDB{" "}
+          Manage your passwords locally in your browser — stored in localStorage
           <FaDatabase className="text-cyan-400" />
         </p>
 
@@ -335,7 +340,7 @@ export default function Mannager() {
               ) : (
                 <FaSave className="text-lg" />
               )}
-              {saving ? "Saving..." : "Save Password"}
+              {saving ? "Saving..." : isEditing ? "Update Password" : "Save Password"}
             </button>
             {/* Generate shortcut */}
             <button
@@ -389,7 +394,7 @@ export default function Mannager() {
                 <tbody>
                   {filteredPasswords.map((item) => (
                     <tr
-                      key={item._id}
+                      key={item.id}
                       className="hover:bg-white/10 transition-all border-b border-white/10"
                     >
                       <td className="p-3 sm:p-4">
@@ -434,14 +439,14 @@ export default function Mannager() {
                       <td className="p-3 sm:p-4">
                         <div className="flex justify-center gap-4">
                           <button
-                            onClick={() => editPassword(item._id)}
+                            onClick={() => editPassword(item.id)}
                             className="text-gray-400 hover:text-yellow-400 transition"
                             title="Edit"
                           >
                             <FaEdit className="text-lg" />
                           </button>
                           <button
-                            onClick={() => deletePassword(item._id)}
+                            onClick={() => deletePassword(item.id)}
                             className="text-gray-400 hover:text-red-400 transition"
                             title="Delete"
                           >
