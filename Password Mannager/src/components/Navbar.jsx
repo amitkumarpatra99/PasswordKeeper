@@ -50,7 +50,7 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto flex justify-between items-center py-3 px-6 text-white">
         {/* Brand Logo */}
-        <Link
+        <NavLink
           to="/"
           className="flex items-center gap-2 cursor-pointer select-none group"
         >
@@ -58,7 +58,7 @@ const Navbar = () => {
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400 group-hover:scale-105 transition-all duration-300">
             Password <span className="text-white">Keeper</span>
           </h1>
-        </Link>
+        </NavLink>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6 font-semibold">
@@ -108,13 +108,17 @@ const Navbar = () => {
         } bg-[#0A2647]/95 backdrop-blur-xl border-t border-white/10`}
       >
         <div className="py-4 px-6 flex flex-col gap-4">
-          <Link
+          <NavLink
             to="/"
-            className="flex items-center gap-2 text-white hover:text-cyan-400 transition-all duration-200"
+            className={({ isActive }) =>
+              `flex items-center gap-2 text-white transition-all duration-200 ${
+                isActive ? 'text-cyan-400' : 'hover:text-cyan-400'
+              }`
+            }
           >
             <FaHome className="text-lg" />
             {/* Home */}
-          </Link>
+          </NavLink>
 
           <a
             href="https://github.com/amitkumarpatra99"
